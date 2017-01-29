@@ -12,15 +12,38 @@ class SensorReader:
     Reads data from accelerometer, gyroscope and compass
     """
 
-    def __init__(self):
+    ACC = 1
+    GYR = 2
+    COMP = 4
+    EMG = 8
+
+    def __init__(self, enabled_sensors=ACC | GYR | COMP | EMG):
+        """
+
+        :param enabled_sensors: Which sensor to read from (default all)
+        """
         self.__stopped = True
         self.samples_per_sec = 0
-        self.accelerometer = ADXL345(alternate=True)
-        self.accelerometer.set_data_rate(800)
-        self.accelerometer.set_range(16, True)
-        self.gyroscope = ITG3200()
-        self.compass = HMC5883L()
-        self.emg = EMG()
+
+        self.sensor_list = []
+
+        if enabled_sensors & self.ACC:
+            self.accelerometer = ADXL345(alternate=True)
+            self.accelerometer.set_data_rate(800)
+            self.accelerometer.set_range(16, True)
+            self.sensor_list.append('acc')
+
+        if enabled_sensors & self.GYR:
+            self.gyroscope = ITG3200()
+            self.sensor_list.append('gyr')
+
+        if enabled_sensors & self.COMP:
+            self.compass = HMC5883L()
+            self.sensor_list.append('comp')
+
+        if enabled_sensors & self.EMG:
+            self.emg = EMG()
+            self.sensor_list.append('emg')
 
     def set_sensor_listener(self, listener):
         self.listener = listener
@@ -107,11 +130,8 @@ class SensorReader:
 
         :return: Which sensor to read from in the current iteration (based on read_samples)
         """
-        remainder = self.read_samples % 2
-        if remainder == 0:
-            return 'acc'
-        else:
-            return 'emg'
+        remainder = self.read_samples % len(self.sensor_list)
+        return self.sensor_list[remainder]
 
     @staticmethod
     def current_millis_frac():
