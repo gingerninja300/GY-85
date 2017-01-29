@@ -26,7 +26,7 @@ class SocketSender:
         # defining socket to commmunicate through
         self.server_socket = socket(AF_INET, SOCK_STREAM)
         # testing connection
-        self.server_socket.connect(self.server_name)
+        self.server_socket.connect((self.server_name, self.port))
 
     def on_sensor_data_changed(self, data_point):
         """
@@ -48,7 +48,7 @@ class SocketSender:
         :return:
         """
 
-        self.server_socket.sentto(str(sample), (self.server_name, self.port))
+        self.server_socket.send(str(sample))
 
     def start_send_loop(self):
         """
