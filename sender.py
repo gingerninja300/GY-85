@@ -10,7 +10,7 @@ class SocketSender:
     Concurrently sends sensor data to server
     """
 
-    def __init__(self, nth_sample=1, server_name='192.168.43.217', port=80):
+    def __init__(self, nth_sample=1, server_name='192.168.43.217', port=5000):
         """
 
         :param nth_sample: Only every nth sample is sent. Use 1 to print every single sample.

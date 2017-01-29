@@ -9,7 +9,7 @@ class SocketReceiver:
     Receives data points from sender over socket connection and passes them to a consumer.
     """
 
-    def __init__(self, port=80):
+    def __init__(self, port=5000):
         self.port = port
         self.__stopped = True
 
