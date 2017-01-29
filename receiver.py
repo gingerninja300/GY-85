@@ -1,4 +1,4 @@
-from _socket import gethostbyname, socket, AF_INET, SOCK_DGRAM
+from _socket import gethostbyname, socket, AF_INET, SOCK_DGRAM, SOCK_STREAM
 
 from data_point import DataPoint
 
@@ -20,13 +20,16 @@ class SocketReceiver:
         self.__stopped = False
 
         self.host_name = gethostbyname('0.0.0.0')
-        self.sock = socket(AF_INET, SOCK_DGRAM)
+        self.sock = socket(AF_INET, SOCK_STREAM)
         self.sock.bind((self.host_name, self.port))
+
+        self.sock.listen(1)
+        conn, addr = self.sock.accept()
 
         print ("Test server listening on port {0}".format(self.port))
 
         while not self.__stopped:
-            (data, addr) = self.sock.recvfrom(1024)
+            data = conn.recv(4000).decode("ascii")
             # pass to consumer
             if not self.listener.on_sensor_data_changed(data):
                 self.__stopped = True

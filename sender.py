@@ -48,7 +48,7 @@ class SocketSender:
         :return:
         """
 
-        self.server_socket.send(str(sample))
+        self.server_socket.send(str(sample) + '\n')
 
     def start_send_loop(self):
         """
