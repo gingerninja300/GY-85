@@ -29,11 +29,28 @@ class SocketReceiver:
         print ("Test server listening on port {0}".format(self.port))
 
         while not self.__stopped:
-            data = conn.recv(4000).decode("ascii")
-            # pass to consumer
-            if not self.listener.on_sensor_data_changed(data):
-                self.__stopped = True
-                print("Stopping sensor reader")
+            data = conn.recv(32768).decode("ascii")
+            last_truncated = None
+            for line in data.split('\n'):
+                if len(line) == 0:
+                    continue
+                decoded = DataPoint.from_str(line)
+                if decoded is None:
+                    # it might be none because sometimes the chunks that are received don't align with
+                    # the samples that were read, so for a sample, only the first part might be included
+                    # in the buffer and the rest of it in the next buffer
+                    if last_truncated is None:
+                        last_truncated = line
+                        continue
+                    else:
+                        decoded = DataPoint.from_str(last_truncated + line)
+                        assert decoded is not None
+                        last_truncated = None
+
+                # pass to consumer
+                if not self.listener.on_sensor_data_received(decoded):
+                    self.__stopped = True
+                    print("Stopping sensor reader")
 
     def stop(self):
         self.__stopped = True
