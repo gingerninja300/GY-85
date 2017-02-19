@@ -25,7 +25,7 @@ class DataPoint:
         decimals = int(((self.time - int(self.time)) * 10000)) / 10000.0
         time_str = str(int(self.time) + decimals)
         return self.sensor_type + ',' + format(self.x) + ',' + format(self.y) + ',' + format(
-            self.z) + ',' + trunc(time_str)
+            self.z) + ',' + str(self.time)
 
     @staticmethod
     def from_str(serialized):

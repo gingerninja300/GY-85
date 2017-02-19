@@ -95,14 +95,14 @@ class SensorReader:
         acc_reading.x = acc[0]
         acc_reading.y = acc[1]
         acc_reading.z = acc[2]
-        acc_reading.time = self.current_millis_frac() - self.started_ms
+        acc_reading.time = time.time()
         return acc_reading
 
     def __read_emg(self):
         reading = DataPoint()
         reading.sensor_type = 'emg'
         reading.x = self.emg.read_emg()
-        reading.time = self.current_millis_frac() - self.started_ms
+        reading.time = time.time()
         return reading
 
     def __read_gyroscope(self):
@@ -112,7 +112,7 @@ class SensorReader:
         gyr_reading.x = gyr[0]
         gyr_reading.y = gyr[1]
         gyr_reading.z = gyr[2]
-        gyr_reading.time = self.current_millis_frac() - self.started_ms
+        gyr_reading.time = time.time()
         return gyr_reading
 
     def __read_compass(self):
@@ -122,7 +122,7 @@ class SensorReader:
         comp_reading.x = comp[0]
         comp_reading.y = comp[1]
         comp_reading.z = comp[2]
-        comp_reading.time = self.current_millis_frac() - self.started_ms
+        comp_reading.time = time.time()
         return comp_reading
 
     def __sensor_to_read(self):
