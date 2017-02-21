@@ -30,11 +30,15 @@ class SocketReceiver:
 
         while not self.__stopped:
             data = conn.recv(32768).decode("ascii")
+            first = True
             last_truncated = None
             for line in data.split('\n'):
                 if len(line) == 0:
                     continue
                 decoded = DataPoint.from_str(line)
+                if first:
+                    first = False
+                    print('Received and decoded, t={}'.format(decoded.time))
                 if decoded is None:
                     # it might be none because sometimes the chunks that are received don't align with
                     # the samples that were read, so for a sample, only the first part might be included

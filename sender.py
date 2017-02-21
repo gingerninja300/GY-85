@@ -1,4 +1,4 @@
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_STREAM, SOL_SOCKET, SO_SNDBUF
 import multiprocessing
 from multiprocessing import Queue
 
@@ -25,6 +25,7 @@ class SocketSender:
 
         # defining socket to commmunicate through
         self.server_socket = socket(AF_INET, SOCK_STREAM)
+        # self.server_socket.setsockopt(SOL_SOCKET, SO_SNDBUF, 8192)
         # testing connection
         self.server_socket.connect((self.server_name, self.port))
 
@@ -47,6 +48,8 @@ class SocketSender:
         :param sample: Send a DataPoint to the server
         :return:
         """
+
+        print('Send')
 
         self.server_socket.send(str(sample) + '\n')
 
