@@ -25,6 +25,8 @@ class SensorReader:
         self.__stopped = True
         self.samples_per_sec = 0
 
+        self.VERBOSE = False
+
         self.sensor_list = []
 
         if enabled_sensors & self.ACC:
@@ -72,9 +74,10 @@ class SensorReader:
             curr_sec = self.current_sec()
             if self.last_sec != curr_sec:
                 secs = curr_sec - self.last_sec
-                print('Samples read: ' + str(
-                    self.read_samples) + ' (samples/sec: ' +
-                      str(self.samples_per_sec) + ")")
+                if self.VERBOSE:
+                    print('Samples read: ' + str(
+                        self.read_samples) + ' (samples/sec: ' +
+                          str(self.samples_per_sec) + ")")
                 self.samples_per_sec = self.__samples_in_sec / secs
                 self.__samples_in_sec = 0
                 self.last_sec = curr_sec

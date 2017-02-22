@@ -9,16 +9,21 @@ class CombinedSensorPrinter:
     """
 
     def __init__(self):
-        self.server_data = []
+        self.server_acc = []
+        self.server_i = 0
         self.last_client_acc_reading = None
+        self.f = open('combined_out.txt', 'w')
 
     def on_sensor_data_changed(self, reading):
         """
         Call when data was read on the server
         """
+
+        assert reading.sensor_type == 'acc'
+
         # print('Server: ' + str(reading))
 
-        self.server_data.append(reading)
+        self.server_acc.append(reading)
 
         return True
 
@@ -34,16 +39,30 @@ class CombinedSensorPrinter:
             if self.last_client_acc_reading is None:
                 return True
 
-            # look for the latest acc reading on the server that is earlier than the client reading
+            # look for the latest acc reading on the server that is earlier than the client reading.
+            # note that the last server reading could be used multiple times, but that's unlikely since
+            # the sampling rate on the server is much higher
             last_acc_reading_server = None
 
-            for i in range(len(self.server_data) - 1, -1, -1):
-                if self.server_data[i].time < client_reading.time and self.server_data[i].sensor_type == 'acc':
-                    last_acc_reading_server = self.server_data[i]
+            while self.server_i < len(self.server_acc):
+                if self.server_acc[self.server_i].time > client_reading.time:
+                    if self.server_i > 0:
+                        last_acc_reading_server = self.server_acc[self.server_i - 1]
                     break
+                elif self.server_i == len(self.server_acc) - 1:
+                    last_acc_reading_server = self.server_acc[self.server_i]
 
-            # print('Combined sample:\n\tServer acc: ' + str(last_acc_reading_server)
-            #       + '\n\tClient acc: ' + str(self.last_client_acc_reading)
-            #       + '\n\tClient emg: ' + str(client_reading))
+                self.server_i += 1
+
+            # algorithm should always find last reading unless server data is empty
+            assert len(self.server_acc) == 0 or last_acc_reading_server is not None
+
+            if last_acc_reading_server is not None:
+                pass
+                s = 'Combined sample:\n\tServer acc: ' + str(last_acc_reading_server) \
+                    + '\n\tClient acc: ' + str(self.last_client_acc_reading)\
+                    + '\n\tClient emg: ' + str(client_reading)
+
+                self.f.write(s + '\n')
 
         return True
