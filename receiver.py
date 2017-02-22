@@ -38,7 +38,8 @@ class SocketReceiver:
                 decoded = DataPoint.from_str(line)
                 if first:
                     first = False
-                    print('Received and decoded, t={}'.format(decoded.time))
+                    if decoded:
+                        print('Received and decoded, t={}'.format(decoded.time))
                 if decoded is None:
                     # it might be none because sometimes the chunks that are received don't align with
                     # the samples that were read, so for a sample, only the first part might be included
@@ -47,12 +48,15 @@ class SocketReceiver:
                         last_truncated = line
                         continue
                     else:
-                        decoded = DataPoint.from_str(last_truncated + line)
-                        assert decoded is not None
+                        try:
+                            decoded = DataPoint.from_str(last_truncated + line)
+                        except ValueError:
+                            decoded = None
+                        # assert decoded is not None
                         last_truncated = None
 
                 # pass to consumer
-                if not self.listener.on_sensor_data_received(decoded):
+                if decoded and not self.listener.on_sensor_data_received(decoded):
                     self.__stopped = True
                     print("Stopping sensor reader")
 

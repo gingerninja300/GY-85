@@ -25,7 +25,7 @@ class SensorReader:
         self.__stopped = True
         self.samples_per_sec = 0
 
-        self.VERBOSE = False
+        self.VERBOSE = True
 
         self.sensor_list = []
 

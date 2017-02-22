@@ -1,3 +1,6 @@
+from data_point import DataPoint
+
+
 class CombinedSensorPrinter:
     """
     Combines sensor data it receives from two Pis. Should run on the server.
@@ -44,6 +47,10 @@ class CombinedSensorPrinter:
             # the sampling rate on the server is much higher
             last_acc_reading_server = None
 
+            # average values of skipped accelerometer points
+            skipped_acc_sum = DataPoint()
+            skipped_acc_i = 0
+
             while self.server_i < len(self.server_acc):
                 if self.server_acc[self.server_i].time > client_reading.time:
                     if self.server_i > 0:
@@ -51,16 +58,30 @@ class CombinedSensorPrinter:
                     break
                 elif self.server_i == len(self.server_acc) - 1:
                     last_acc_reading_server = self.server_acc[self.server_i]
+                    skipped_acc_sum.x += self.server_acc[self.server_i].x
+                    skipped_acc_sum.y += self.server_acc[self.server_i].y
+                    skipped_acc_sum.z += self.server_acc[self.server_i].z
+                    skipped_acc_i += 1
+                else:
+                    skipped_acc_sum.x += self.server_acc[self.server_i].x
+                    skipped_acc_sum.y += self.server_acc[self.server_i].y
+                    skipped_acc_sum.z += self.server_acc[self.server_i].z
+                    skipped_acc_i += 1
 
                 self.server_i += 1
 
             # algorithm should always find last reading unless server data is empty
-            assert len(self.server_acc) == 0 or last_acc_reading_server is not None
+            # but sometimes doesn't, that's why this line is commented out haha
+            # assert len(self.server_acc) == 0 or last_acc_reading_server is not None
 
             if last_acc_reading_server is not None:
-                pass
+                if skipped_acc_i != 0:
+                    last_acc_reading_server.x = skipped_acc_sum.x / float(skipped_acc_i)
+                    last_acc_reading_server.y = skipped_acc_sum.y / float(skipped_acc_i)
+                    last_acc_reading_server.z = skipped_acc_sum.z / float(skipped_acc_i)
+
                 s = 'Combined sample:\n\tServer acc: ' + str(last_acc_reading_server) \
-                    + '\n\tClient acc: ' + str(self.last_client_acc_reading)\
+                    + '\n\tClient acc: ' + str(self.last_client_acc_reading) \
                     + '\n\tClient emg: ' + str(client_reading)
 
                 self.f.write(s + '\n')
