@@ -15,7 +15,9 @@ class CombinedSensorPrinter:
         self.server_acc = []
         self.server_i = 0
         self.last_client_acc_reading = None
-        self.f = open('combined_out.txt', 'w')
+        self.fname = 'combined_out.txt'
+        self.f = open(self.fname, 'w')
+        print('Writing samples to ' + self.fname)
 
     def on_sensor_data_changed(self, reading):
         """
