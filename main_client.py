@@ -9,7 +9,7 @@ from sensor_reader import SensorReader
 
 
 def start_loop_client(args):
-    sensor_reader = SensorReader(enabled_sensors=SensorReader.ACC | SensorReader.EMG | SensorReader.GYR | SensorReader.COMP)
+    sensor_reader = SensorReader(enabled_sensors=SensorReader.ACC | SensorReader.EMG | SensorReader.PRESS)
     if args.nth is not None:
         socket_sender = SocketSender(args.nth)
     else:

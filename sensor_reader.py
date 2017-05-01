@@ -2,7 +2,7 @@ import random
 import time
 from adxl345.i2c import ADXL345
 from data_point import DataPoint
-from emg.emg import EMG
+from adc.adc import ADC
 from hmc5883l.HMC5883L import HMC5883L
 from itg3200.ITG3200 import ITG3200
 
@@ -16,8 +16,9 @@ class SensorReader:
     GYR = 2
     COMP = 4
     EMG = 8
+    PRESS = 16  # pressure sensor
 
-    def __init__(self, enabled_sensors=ACC | GYR | COMP | EMG):
+    def __init__(self, enabled_sensors=ACC | GYR | COMP | EMG | PRESS):
         """
 
         :param enabled_sensors: Which sensor to read from (default all)
@@ -44,8 +45,16 @@ class SensorReader:
             self.sensor_list.append('comp')
 
         if enabled_sensors & self.EMG:
-            self.emg = EMG()
-            self.sensor_list.append('emg')
+            self.emg0 = ADC(0)
+            self.emg1 = ADC(1)
+            self.sensor_list.append('emg0')
+            self.sensor_list.append('emg1')
+
+        if enabled_sensors & self.PRESS:
+            self.press0 = ADC(2)
+            self.press1 = ADC(3)
+            self.sensor_list.append('press0')
+            self.sensor_list.append('press1')
 
     def set_sensor_listener(self, listener):
         self.listener = listener
@@ -68,8 +77,14 @@ class SensorReader:
                 reading = self.__read_compass()
             elif sensor == 'acc':
                 reading = self.__read_accelerometer()
+            elif sensor == 'emg0':
+                reading = self.__read_emg_0()
+            elif sensor == 'emg1':
+                reading = self.__read_emg_1()
+            elif sensor == 'press0':
+                reading = self.__read_pressure_0()
             else:
-                reading = self.__read_emg()
+                reading = self.__read_pressure_1()
 
             curr_sec = self.current_sec()
             if self.last_sec != curr_sec:
@@ -101,11 +116,34 @@ class SensorReader:
         acc_reading.time = time.time()
         return acc_reading
 
-    def __read_emg(self):
+    def __read_emg_0(self):
         reading = DataPoint()
-        reading.sensor_type = 'emg'
-        reading.x = self.emg.read_emg()
+        reading.sensor_type = 'emg0'
+        reading.x = self.emg0.read_adc()
         reading.time = time.time()
+        return reading
+
+    def __read_emg_1(self):
+        reading = DataPoint()
+        reading.sensor_type = 'emg1'
+        reading.x = self.emg1.read_adc()
+        reading.time = time.time()
+        return reading
+
+    def __read_pressure_0(self):
+        reading = DataPoint()
+        reading.sensor_type = 'press0'
+        reading.x = self.press0.read_adc()
+        reading.time = time.time()
+        print(reading)
+        return reading
+
+    def __read_pressure_1(self):
+        reading = DataPoint()
+        reading.sensor_type = 'press1'
+        reading.x = self.press1.read_adc()
+        reading.time = time.time()
+        print(reading)
         return reading
 
     def __read_gyroscope(self):

@@ -8,13 +8,13 @@ import time
 import Adafruit_ADS1x15
 
 
-class EMG:
+class ADC:
     """
     Faciliatates access to the Myoware EMG sensor. It's a wrapper around Adafruit_ADS1x15 which
     reads from the analog-to-digital-converter.
     """
 
-    def __init__(self):
+    def __init__(self, adc_index=0):
         # Create an ADS1115 ADC (16-bit) instance.
         self.adc = Adafruit_ADS1x15.ADS1115()
 
@@ -35,6 +35,7 @@ class EMG:
         #  -  16 = +/-0.256V
         # See table 3 in the ADS1015/ADS1115 datasheet for more info on gain.
         self.GAIN = 1
+        self.ADC_INDEX = adc_index
 
-    def read_emg(self):
-        return self.adc.read_adc(0, gain=self.GAIN)
+    def read_adc(self):
+        return self.adc.read_adc(self.ADC_INDEX, gain=self.GAIN)

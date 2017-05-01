@@ -14,7 +14,7 @@ class CombinedSensorPrinter:
     def __init__(self):
         self.server_acc = []
         self.server_i = 0
-        self.last_client_acc_reading = None
+        self.last_client_readings = {}
         self.fname = 'combined_out.txt'
         self.f = open(self.fname, 'w')
         print('Writing samples to ' + self.fname)
@@ -24,7 +24,8 @@ class CombinedSensorPrinter:
         Call when data was read on the server
         """
 
-        assert reading.sensor_type == 'acc'
+        if not reading.sensor_type == 'acc':
+            print('Wrong sensor type: ' + reading.sensor_type)
 
         # print('Server: ' + str(reading))
 
@@ -38,12 +39,9 @@ class CombinedSensorPrinter:
         """
         # print('Client: ' + str(reading))
 
-        if client_reading.sensor_type == 'acc':
-            self.last_client_acc_reading = client_reading
+        if client_reading.sensor_type != 'press1':
+            self.last_client_readings[client_reading.sensor_type] = client_reading
         else:
-            if self.last_client_acc_reading is None:
-                return True
-
             # look for the latest acc reading on the server that is earlier than the client reading.
             # note that the last server reading could be used multiple times, but that's unlikely since
             # the sampling rate on the server is much higher
@@ -83,8 +81,11 @@ class CombinedSensorPrinter:
                     last_acc_reading_server.z = skipped_acc_sum.z / float(skipped_acc_i)
 
                 s = 'Combined sample:\n\tServer acc: ' + str(last_acc_reading_server) \
-                    + '\n\tClient acc: ' + str(self.last_client_acc_reading) \
-                    + '\n\tClient emg: ' + str(client_reading)
+                    + '\n\tClient acc: ' + str(self.last_client_readings['acc']) \
+                    + '\n\tClient emg0: ' + str(self.last_client_readings['emg0']) \
+                    + '\n\tClient emg1: ' + str(self.last_client_readings['emg1']) \
+                    + '\n\tClient press0: ' + str(self.last_client_readings['press0']) \
+                    + '\n\tClient press1: ' + str(client_reading)
 
                 self.f.write(s + '\n')
 
